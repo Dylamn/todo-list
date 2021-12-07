@@ -1,6 +1,6 @@
 # Todo List
 This application was made for learning purposes, in this case for React and Redux.
-It's a simple todo list application which interacts with a _**Firebase Realtime Database**_ for data persistense.
+It's a simple todo list application that interacts with a _**Firebase Realtime Database**_ to persist data (todos).
 
 ## Installation
 You'll have to install the dependencies listed in the `package.json` with your dependency manager (e.g.`npm`, `yarn`)
