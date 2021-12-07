@@ -1,8 +1,21 @@
-# Getting Started with Create React App
+# Todo List
+This application was made for learning purposes, in this case for React and Redux.
+It's a simple todo list application which interacts with a _**Firebase Realtime Database**_ for data persistense.
+
+## Installation
+You'll have to install the dependencies listed in the `package.json` with your dependency manager (e.g.`npm`, `yarn`)
+`````shell
+$ npm install
+`````
+Then, in order to make the works, you'll have to use a _Firebase Realtime Database_. The URL of the
+database must be specified in the environment variables (`REACT_APP_FIREBASE_DB_URL` by its name). 
+You can copy the `.env.example` file at the` root of the project and fill the corresponding key.
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+### Available Scripts
 
 In the project directory, you can run:
 
