@@ -10,7 +10,10 @@ module.exports = {
         ...theme('colors'),
         'primary': '#282c34',
         'primary-variant': '#31373e',
-      })
+      }),
+      screens: {
+        'xs': '320px'
+      }
     },
   },
   variants: {

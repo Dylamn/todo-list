@@ -8,7 +8,7 @@ const Home = () => {
         <p className="text-xl mx-8 sm:mx-0">
           An application created to learning React and Redux. And a bit of SASS too.
         </p>
-        <div className="p-6 space-x-4">
+        <div className="p-6 space-x-2 xs:space-x-4">
           <Link to="todos">
             <button className="rounded-md px-4 py-2 bg-blue-600">Get started</button>
           </Link>
