@@ -1,4 +1,4 @@
-import apiFirebase from "../config/api.firebase";
+import apiFirebase from "../../../config/api.firebase";
 
 export const REQUEST_TODO = 'REQUEST_TODO'
 export const FETCH_TODO_SUCCESS = 'FETCH_TODO_SUCCESS'

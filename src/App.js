@@ -1,19 +1,26 @@
-import { Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { lazy, Suspense } from "react";
+import { Routes, Route } from 'react-router-dom'
+
+import { Header, Home, Footer } from './components'
+import { NotFound } from "./components/errors";
+import { Loader } from "./components/utils";
 import './App.css'
-import { AddTodo, TodoList } from './components'
+
+
+const LazyTodos = lazy(() => import('./features/todos'))
 
 function App () {
-  const params = useParams()
-
   return (
-    <div id="app">
-      <div className="container mx-auto px-4 pt-6">
-        <AddTodo />
+    <div id="app" className="h-screen">
+      <Header />
+      <Suspense fallback={<Loader />}>
         <Routes>
-          <Route path="/:filter" element={<TodoList params={params}/>}/>
-          <Route path="*" element={<Navigate to="/all"/>} />
+          <Route path="/" element={<Home />} />
+          <Route path="todos" element={<LazyTodos />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
-      </div>
+      </Suspense>
+      <Footer />
     </div>
   );
 }

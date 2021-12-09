@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
@@ -6,7 +6,7 @@ import Filter from "./Filter";
 import TodoItem from './TodoItem'
 import { fetchTodo, tryDeleteTodo, tryToggleTodo } from "../../store/actions";
 import { filteredTodosListSelector } from "../../store/selectors";
-import withRouter from "../hoc/withRouter";
+import withRouter from "../../../../components/hoc/withRouter";
 
 const TodoList = ({todos, fetchTodo, tryToggleTodo, tryDeleteTodo}) => {
   useEffect(() => {
@@ -44,7 +44,7 @@ TodoList.propTypes = {
 
 export default withRouter(
   connect((state, ownProps) => {
-    const filter = ownProps.params.filter
+    const filter = new URLSearchParams(ownProps.location.search).get('filter')
 
     return {
       todos: filteredTodosListSelector(state, filter)

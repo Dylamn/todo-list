@@ -6,7 +6,7 @@ const initialState = {
   error: null,
 }
 
-export const todoReducer = (state = initialState, action) => {
+const todoReducer = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.REQUEST_TODO: {
       return {
@@ -16,10 +16,13 @@ export const todoReducer = (state = initialState, action) => {
     }
     case actionTypes.FETCH_TODO_SUCCESS: {
       if (action.todos) {
+        // Remove duplicates if any...
+        const todos = [...new Map([...state.data, ...action.todos].map(obj => [obj.id, obj])).values()]
+
         return {
           ...state,
           loading: false,
-          data: [...state.data, ...action.todos],
+          data: todos,
           error: null
         }
       } else {
@@ -84,3 +87,5 @@ export const todoReducer = (state = initialState, action) => {
     }
   }
 }
+
+export default todoReducer
