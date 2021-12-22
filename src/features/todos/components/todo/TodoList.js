@@ -1,18 +1,11 @@
-import { useEffect } from "react";
-import { connect } from "react-redux";
 import PropTypes from "prop-types";
+import { todoType } from "../../../../types";
 
 import Filter from "./Filter";
 import TodoItem from './TodoItem'
-import { fetchTodo, tryDeleteTodo, tryToggleTodo } from "../../store/actions";
-import { filteredTodosListSelector } from "../../store/selectors";
-import withRouter from "../../../../components/hoc/withRouter";
+import TodoEdit from "./TodoEdit";
 
-const TodoList = ({todos, fetchTodo, tryToggleTodo, tryDeleteTodo}) => {
-  useEffect(() => {
-    fetchTodo()
-  }, [fetchTodo])
-
+const TodoList = ({todos, ...props}) => {
   return (
     <div id="card" className="mb-8">
       <div id="card-header"
@@ -26,8 +19,19 @@ const TodoList = ({todos, fetchTodo, tryToggleTodo, tryDeleteTodo}) => {
       </div>
       <div id="card-body" className="border-l border-r border-b rounded-b-sm p-4">
         <ul className="flex flex-col">
-          {todos.length > 0 && todos.map(todo => (
-            <TodoItem key={todo.id} todo={todo} tryToggleTodo={tryToggleTodo} tryDeleteTodo={tryDeleteTodo} />
+          {todos && todos.map(todo => todo.editMode ? (
+            <TodoEdit
+              key={todo.id} todo={todo}
+              toggleEditMode={() => props.toggleEditMode(todo)}
+              editTodo={todo => props.editTodo(todo)}
+            />
+          ) : (
+            <TodoItem
+              key={todo.id} todo={todo}
+              editTodo={todo => props.editTodo(todo)}
+              toggleEditMode={() => props.toggleEditMode(todo)}
+              deleteTodo={() => props.deleteTodo(todo)}
+            />
           ))}
         </ul>
       </div>
@@ -36,23 +40,10 @@ const TodoList = ({todos, fetchTodo, tryToggleTodo, tryDeleteTodo}) => {
 }
 
 TodoList.propTypes = {
-  todos: PropTypes.array,
-  fetchTodo: PropTypes.func,
-  tryToggleTodo: PropTypes.func,
+  todos: PropTypes.arrayOf(todoType),
+  editTodo: PropTypes.func,
+  toggleEditMode: PropTypes.func,
   deleteTodo: PropTypes.func,
 }
 
-export default withRouter(
-  connect((state, ownProps) => {
-    const filter = new URLSearchParams(ownProps.location.search).get('filter')
-
-    return {
-      todos: filteredTodosListSelector(state, filter)
-    }
-  }, {
-    fetchTodo,
-    tryToggleTodo,
-    tryDeleteTodo,
-  })(TodoList)
-)
-
+export default TodoList

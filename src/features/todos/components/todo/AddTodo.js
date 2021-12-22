@@ -1,11 +1,9 @@
 import { v4 as uuid } from 'uuid'
-import { connect } from "react-redux";
-
-import { tryAddTodo } from "../../store/actions";
 import { useRef } from "react";
+import PropTypes from "prop-types";
 
-const AddTodo = ({tryAddTodo}) => {
-  const refInput = useRef()
+const AddTodo = (props) => {
+  const refInput = useRef(null)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -14,7 +12,7 @@ const AddTodo = ({tryAddTodo}) => {
       return
     }
 
-    tryAddTodo({
+    props.addTodo({
       id: uuid(),
       title: refInput.current.value,
       done: false
@@ -40,6 +38,9 @@ const AddTodo = ({tryAddTodo}) => {
     </div>
   )
 }
-export default connect(null, {
-  tryAddTodo
-})(AddTodo)
+
+AddTodo.propTypes = {
+  addTodo: PropTypes.func,
+}
+
+export default AddTodo

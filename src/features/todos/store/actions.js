@@ -1,4 +1,4 @@
-import apiFirebase from "../../../config/api.firebase";
+import apiFirebase, { clientFirebase } from "../../../config/api.firebase";
 
 export const REQUEST_TODO = 'REQUEST_TODO'
 export const FETCH_TODO_SUCCESS = 'FETCH_TODO_SUCCESS'
@@ -8,112 +8,115 @@ export const TRY_ADD_TODO = 'TRY_ADD_TODO'
 export const ADD_TODO_SUCCESS = 'ADD_TODO_SUCCESS'
 export const ADD_TODO_ERROR = 'ADD_TODO_ERROR'
 
-export const TRY_TOGGLE_TODO = 'TRY_TOGGLE_TODO'
-export const TOGGLE_TODO_SUCCESS = 'TOGGLE_TODO_SUCCESS'
-export const TOGGLE_TODO_ERROR = 'TOGGLE_TODO_ERROR'
+export const TRY_EDIT_TODO = 'TRY_EDIT_TODO'
+export const EDIT_TODO_SUCCESS = 'EDIT_TODO_SUCCESS'
+export const EDIT_TODO_ERROR = 'EDIT_TODO_ERROR'
 
 export const TRY_DELETE_TODO = 'TRY_DELETE_TODO'
 export const DELETE_TODO_SUCCESS = 'DELETE_TODO_SUCCESS'
 export const DELETE_TODO_ERROR = 'DELETE_TODO_ERROR'
 
-export const requestTodo = () => ({
+export const TOGGLE_EDIT_MODE = 'TOGGLE_EDIT_MODE'
+
+export const requestTodoAction = () => ({
   type: REQUEST_TODO
 })
-export const fetchTodoSuccess = (todos) => ({
+export const fetchTodoSuccessAction = (todos) => ({
   type: FETCH_TODO_SUCCESS,
   todos
 })
-export const fetchTodoError = (error) => ({
+export const fetchTodoErrorAction = (error) => ({
   type: FETCH_TODO_ERROR,
   error
 })
-export const fetchTodo = () => {
-  return (dispatch) => {
-    dispatch(requestTodo())
+export const fetchTodoAction = () => {
+  return async dispatch => {
+    dispatch(requestTodoAction())
 
-    return apiFirebase.get('todos.json')
-      .then(
-        response => {
-          const data = response.data
-          dispatch(fetchTodoSuccess(data))
-        },
-        err => dispatch(fetchTodoError(err))
-      )
+    try {
+      const response = await clientFirebase.get('todos.json')
+      const data = response.data
+      dispatch(fetchTodoSuccessAction(data))
+    } catch (error) {
+      dispatch(fetchTodoErrorAction(error))
+    }
   }
 }
 
-export const addTodoSuccess = todo => ({
+export const addTodoSuccessAction = todo => ({
   type: ADD_TODO_SUCCESS,
   todo
 })
-export const addTodoError = error => ({
+export const addTodoErrorAction = error => ({
   type: ADD_TODO_ERROR,
   error
 })
-export const tryAddTodo = todo => {
-  return (dispatch, getState) => {
+export const tryAddTodoAction = todo => {
+  return async (dispatch, getState) => {
     dispatch({
       type: TRY_ADD_TODO
     })
     const todos = [...getState().todos.data, todo]
 
-    return apiFirebase.put('todos.json', todos)
-      .then(
-        response => dispatch(addTodoSuccess(todo)),
-        err => dispatch(addTodoError(err))
-      )
+    try {
+      await apiFirebase.saveTodos(todos)
+      dispatch(addTodoSuccessAction(todo))
+    } catch (e) {
+      dispatch(addTodoErrorAction(e))
+    }
   }
 }
 
 
-export const toggleTodoSuccess = (todos) => ({
-  type: TOGGLE_TODO_SUCCESS,
-  todos
+export const editTodoSuccessAction = (todo) => ({
+  type: EDIT_TODO_SUCCESS,
+  todo
 })
-export const toggleTodoError = error => ({
-  type: TOGGLE_TODO_ERROR,
+export const editTodoErrorAction = error => ({
+  type: EDIT_TODO_ERROR,
   error
 })
-export const tryToggleTodo = todo => {
-  return (dispatch, getState) => {
+export const tryEditTodoAction = todo => {
+  return async (dispatch, getState) => {
     dispatch({
-      type: TRY_TOGGLE_TODO
+      type: TRY_EDIT_TODO
     })
-    const todos = getState().todos.data.map(t => {
-      if (t.id === todo.id) {
-        t.done = !t.done
-      }
+    const todos = getState().todos.data.map(t => t.id === todo.id ? todo : t)
 
-      return t
-    })
-
-    return apiFirebase.put('todos.json', todos)
-      .then(
-        (response) => dispatch(toggleTodoSuccess(response.data)),
-        (err) => dispatch(toggleTodoError(err))
-      )
+    try {
+      await apiFirebase.saveTodos(todos)
+      dispatch(editTodoSuccessAction(todo))
+    }catch (error) {
+      dispatch(editTodoErrorAction(error))
+    }
   }
 }
 
 
-export const deleteTodoSuccess = todos => ({
+export const deleteTodoSuccessAction = todos => ({
   type: DELETE_TODO_SUCCESS,
   todos
 })
-export const deleteTodoError = error => ({
+export const deleteTodoErrorAction = error => ({
   type: DELETE_TODO_ERROR,
   error
 })
-export const tryDeleteTodo = todo => {
-  return (dispatch, getState) => {
+export const tryDeleteTodoAction = todo => {
+  return async (dispatch, getState) => {
     dispatch({
       type: TRY_DELETE_TODO
     })
     const todos = getState().todos.data.filter(t => t.id !== todo.id)
-
-    apiFirebase.put('todos.json', todos).then(
-      response => dispatch(deleteTodoSuccess(response.data)),
-      error => dispatch(deleteTodoError(error))
-    )
+    try {
+      await apiFirebase.saveTodos(todos)
+      dispatch(deleteTodoSuccessAction(todos))
+    } catch (error) {
+      dispatch(deleteTodoErrorAction(error))
+    }
   }
 }
+
+export const toggleEditModeAction = (todo) => ({
+  type: TOGGLE_EDIT_MODE,
+  todo
+})

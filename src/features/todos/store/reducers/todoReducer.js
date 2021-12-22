@@ -8,6 +8,12 @@ const initialState = {
 
 const todoReducer = (state = initialState, action) => {
   switch (action.type) {
+    case actionTypes.TOGGLE_EDIT_MODE: {
+      return {
+        ...state,
+        data: state.data.map(t => t.id === action.todo.id ? {...t, editMode: !t.editMode} : t)
+      }
+    }
     case actionTypes.REQUEST_TODO: {
       return {
         ...state,
@@ -17,7 +23,11 @@ const todoReducer = (state = initialState, action) => {
     case actionTypes.FETCH_TODO_SUCCESS: {
       if (action.todos) {
         // Remove duplicates if any...
-        const todos = [...new Map([...state.data, ...action.todos].map(obj => [obj.id, obj])).values()]
+        const todos = [
+          ...new Map([...state.data, ...action.todos].map(
+            obj => [obj.id, {...obj, editMode: false}]
+          )).values()
+        ]
 
         return {
           ...state,
@@ -32,56 +42,41 @@ const todoReducer = (state = initialState, action) => {
         }
       }
     }
-    case actionTypes.FETCH_TODO_ERROR: {
-      return {
-        ...state,
-        loading: false,
-        error: action.error,
-      }
-    }
-
     case actionTypes.ADD_TODO_SUCCESS: {
       return {
         ...state,
         data: [...state.data, action.todo],
-        error: null
-      }
-    }
-    case actionTypes.ADD_TODO_ERROR: {
-      return {
-        ...state,
-        error: action.error
+        loading: false,
+        error: null,
       }
     }
 
-    case actionTypes.TOGGLE_TODO_SUCCESS: {
+    case actionTypes.EDIT_TODO_SUCCESS: {
       return {
         ...state,
-        data: action.todos,
-        error: null
+        data: state.data.map(t => t.id === action.todo.id ? action.todo : t),
+        loading: false,
+        error: null,
       }
     }
-    case actionTypes.TOGGLE_TODO_ERROR: {
-      return {
-        ...state,
-        error: action.error
-      }
-    }
-
     case actionTypes.DELETE_TODO_SUCCESS: {
       return {
         ...state,
         data: action.todos,
-        error: null
+        loading: false,
+        error: null,
       }
     }
+    case actionTypes.FETCH_TODO_ERROR:
+    case actionTypes.ADD_TODO_ERROR:
+    case actionTypes.EDIT_TODO_ERROR:
     case actionTypes.DELETE_TODO_ERROR: {
       return {
         ...state,
-        error: action.error
+        error: action.error,
+        loading: false,
       }
     }
-
     default: {
       return state
     }

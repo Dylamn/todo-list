@@ -16,7 +16,7 @@ function App () {
       <Suspense fallback={<Loader />}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="todos" element={<LazyTodos />} />
+          <Route path="todos/*" element={<LazyTodos />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
