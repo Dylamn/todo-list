@@ -1,7 +1,7 @@
-import { v4 as uuid } from "uuid";
 import configureMockStore from 'redux-mock-store'
 import thunk from 'redux-thunk'
 
+import { createTodo } from "../__test__/helpers";
 import apiFirebase from "../../../config/api.firebase";
 import {
   ADD_TODO_ERROR,
@@ -23,25 +23,13 @@ import {
   REQUEST_TODO,
   requestTodoAction,
   TOGGLE_EDIT_MODE,
-  toggleEditModeAction, TRY_ADD_TODO,
+  toggleEditModeAction,
   tryAddTodoAction,
+  tryDeleteTodoAction,
+  tryEditTodoAction
 } from "./actions";
 
 jest.mock('../../../config/api.firebase')
-
-/**
- * Create a todo.
- *
- * @param {string} title
- * @return {{id: string, title: string, done: boolean}}
- */
-function createTodo (title) {
-  return {
-    id: uuid(),
-    title: title,
-    done: false
-  }
-}
 
 describe('test synchronous action creators', () => {
   test("should create `requestTodoAction` action", () => {
@@ -152,7 +140,7 @@ describe('test synchronous action creators', () => {
   })
 });
 
-describe('test asynchronous actions', () => {
+describe('test asynchronous actions (thunks)', () => {
   const initialState = {
     todos: {
       data: [],
@@ -169,10 +157,7 @@ describe('test asynchronous actions', () => {
       createTodo('Test'),
     ]
 
-    const requestAction = {
-      type: REQUEST_TODO
-    }
-    const fetchAction = {
+    const expectedAction = {
       type: FETCH_TODO_SUCCESS,
       todos
     }
@@ -181,17 +166,14 @@ describe('test asynchronous actions', () => {
 
     await store.dispatch(fetchTodoAction())
 
-    expect(store.getActions()[0]).toEqual(requestAction)
-    expect(store.getActions()[1]).toEqual(fetchAction)
+    expect(apiFirebase.fetchTodos).toHaveBeenCalled()
+    expect(store.getActions()).toContainEqual(expectedAction)
   })
   test('should dispatch `fetchTodoErrorAction` action', async () => {
     const store = mockStore(initialState)
     const error = new Error('Fetch error')
 
-    const requestAction = {
-      type: REQUEST_TODO
-    }
-    const fetchAction = {
+    const expectedAction = {
       type: FETCH_TODO_ERROR,
       error
     }
@@ -200,18 +182,15 @@ describe('test asynchronous actions', () => {
 
     await store.dispatch(fetchTodoAction())
 
-    expect(store.getActions()[0]).toEqual(requestAction)
-    expect(store.getActions()[1]).toEqual(fetchAction)
+    expect(apiFirebase.fetchTodos).toHaveBeenCalled()
+    expect(store.getActions()).toContainEqual(expectedAction)
   })
 
   test('should dispatch `addTodoSuccessAction` action', async () => {
     const store = mockStore(initialState)
     const todo = createTodo('Add me')
 
-    const tryAddAction = {
-      type: TRY_ADD_TODO
-    }
-    const addSuccessAction = {
+    const expectedAction = {
       type: ADD_TODO_SUCCESS,
       todo
     }
@@ -219,33 +198,112 @@ describe('test asynchronous actions', () => {
     await store.dispatch(tryAddTodoAction(todo))
 
     expect(apiFirebase.saveTodos).toHaveBeenCalled()
-
-    expect(store.getActions()[0]).toEqual(tryAddAction)
-    expect(store.getActions()[1]).toEqual(addSuccessAction)
+    expect(store.getActions()).toContainEqual(expectedAction)
   })
   test('should dispatch `addTodoErrorAction` action', async () => {
     const store = mockStore(initialState)
     const todo = createTodo("You can't add me")
     const error = new Error('Add error')
 
-    const tryAddAction = {
-      type: TRY_ADD_TODO
-    }
-    const addErrorAction = {
+    const expectedAction = {
       type: ADD_TODO_ERROR,
       error
     }
 
     apiFirebase.saveTodos.mockRejectedValueOnce(error)
 
-    try {
-      await store.dispatch(tryAddTodoAction(todo))
-    } catch (e) {
-      expect(apiFirebase.saveTodos).toHaveBeenCalled()
-      expect(apiFirebase.saveTodos).toThrow(error)
+    await store.dispatch(tryAddTodoAction(todo))
+
+    expect(apiFirebase.saveTodos).toHaveBeenCalled()
+    expect(store.getActions()).toContainEqual(expectedAction)
+  })
+
+  test('should dispatch `editTodoSuccessAction` action', async () => {
+    const store = mockStore(initialState)
+    const todo = createTodo("Testing")
+
+    const expectedAction = {
+      type: EDIT_TODO_SUCCESS,
+      todo
     }
 
-    expect(store.getActions()[0]).toEqual(tryAddAction)
-    expect(store.getActions()[1]).toEqual(addErrorAction)
-  })
+    apiFirebase.saveTodos.mockResolvedValueOnce(todo)
+
+    await store.dispatch(tryEditTodoAction(todo))
+
+    expect(apiFirebase.saveTodos).toHaveBeenCalled()
+    expect(store.getActions()).toContainEqual(expectedAction)
+  });
+  test('should dispatch `editTodoErrorAction` action', async () => {
+    const store = mockStore(initialState)
+    const todo = createTodo("Testing more and more...")
+    const error = new Error('edit error')
+
+    const expectedAction = {
+      type: EDIT_TODO_ERROR,
+      error
+    }
+
+    apiFirebase.saveTodos.mockRejectedValueOnce(error)
+
+    await store.dispatch(tryEditTodoAction(todo))
+
+    expect(apiFirebase.saveTodos).toHaveBeenCalled()
+    expect(store.getActions()).toContainEqual(expectedAction)
+  });
+
+  test('should dispatch `deleteTodoSuccessAction` action', async () => {
+    const store = mockStore({
+      ...initialState,
+      ...{
+        todos: {
+          data: [createTodo("First todo")]
+        }
+      }
+    })
+    const todo = store.getState().todos.data[0]
+    const result = store.getState().todos.data.filter(t => t.id !== todo.id)
+
+    const expectedAction = {
+      type: DELETE_TODO_SUCCESS,
+      todos: result
+    }
+
+    await store.dispatch(tryDeleteTodoAction(todo))
+
+    expect(apiFirebase.saveTodos).toHaveBeenCalled()
+    expect(store.getActions()).toContainEqual(expectedAction)
+  });
+  test('should dispatch `deleteTodoErrorAction` action', async () => {
+    const store = mockStore(initialState)
+    const todo = createTodo("Delete an error")
+    const error = new Error('Delete error')
+
+    const expectedAction = {
+      type: DELETE_TODO_ERROR,
+      error
+    }
+
+    apiFirebase.saveTodos.mockRejectedValueOnce(error)
+
+    await store.dispatch(tryDeleteTodoAction(todo))
+
+    expect(store.getActions()).toContainEqual(expectedAction)
+  });
+
+  test('should dispatch `toggleEditModeAction` action', async () => {
+    expect.assertions(1)
+
+    const store = mockStore(initialState)
+    const todo = createTodo('Toggle to edit')
+
+    const expectedAction = {
+      type: TOGGLE_EDIT_MODE,
+      todo
+    }
+
+    await store.dispatch(toggleEditModeAction(todo))
+
+    expect(store.getActions()[0]).toEqual(expectedAction)
+  });
 });
