@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types'
-import { todoType } from '../../../../types'
+import { todoType } from '../../types'
 import { Form, Formik, useField } from 'formik'
 
 const TodoInput = ({label, ...props}) => {

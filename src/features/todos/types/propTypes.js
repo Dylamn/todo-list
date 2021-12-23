@@ -6,3 +6,4 @@ export const todoType = PropTypes.shape({
   done: PropTypes.bool,
   editMode: PropTypes.bool,
 })
+

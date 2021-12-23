@@ -1,4 +1,4 @@
-import apiFirebase, { clientFirebase } from "../../../config/api.firebase";
+import apiFirebase from "../../../config/api.firebase";
 
 export const REQUEST_TODO = 'REQUEST_TODO'
 export const FETCH_TODO_SUCCESS = 'FETCH_TODO_SUCCESS'
@@ -34,7 +34,7 @@ export const fetchTodoAction = () => {
     dispatch(requestTodoAction())
 
     try {
-      const response = await clientFirebase.get('todos.json')
+      const response = await apiFirebase.fetchTodos()
       const data = response.data
       dispatch(fetchTodoSuccessAction(data))
     } catch (error) {
@@ -81,12 +81,16 @@ export const tryEditTodoAction = todo => {
     dispatch({
       type: TRY_EDIT_TODO
     })
-    const todos = getState().todos.data.map(t => t.id === todo.id ? todo : t)
+    const todos = getState().todos.data.map(t =>
+      // Remove the `editMode` property because we don't
+      // need to store this value in the database.
+      (({editMode, ...rest}) => rest)(t.id === todo.id ? todo : t)
+    )
 
     try {
       await apiFirebase.saveTodos(todos)
       dispatch(editTodoSuccessAction(todo))
-    }catch (error) {
+    } catch (error) {
       dispatch(editTodoErrorAction(error))
     }
   }

@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { todoType } from "../../../../types";
+import { todoType } from "../../types";
 
 const TodoItem = ({todo, toggleEditMode, editTodo, deleteTodo}) => {
   const handleEditClick = e => {

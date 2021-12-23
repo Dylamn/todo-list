@@ -7,7 +7,14 @@ export const clientFirebase = axios.create({
 
 const apiFirebase = {
   /**
+   * Returns the list of persistent todos in the Firebase database.
+   *
+   * @return {Promise<AxiosResponse<any>>}
+   */
+  fetchTodos: () => clientFirebase.get('todos.json'),
+  /**
    * Save the given list of todos in the firebase db.
+   *
    * @param {array} todos
    * @return {Promise<AxiosResponse<any>>}
    */

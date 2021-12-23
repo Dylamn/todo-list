@@ -45,7 +45,7 @@ const todoReducer = (state = initialState, action) => {
     case actionTypes.ADD_TODO_SUCCESS: {
       return {
         ...state,
-        data: [...state.data, action.todo],
+        data: [...state.data, {...action.todo, editMode: false}],
         loading: false,
         error: null,
       }
