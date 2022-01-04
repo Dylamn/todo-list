@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^9.8.8",
+    "history": "^5.2.0",
     "postcss": "^7.0.39",
     "redux-devtools-extension": "^2.13.9",
     "redux-logger": "^3.0.6",

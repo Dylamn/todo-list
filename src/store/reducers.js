@@ -1,8 +1,8 @@
 // Act as a fake reducer.
-export const auth = (state = {isAuthenticated: false}, action) => state
+export const authReducer = (state = {isAuthenticated: false}, action) => state
 
 const reducers = {
-  auth
+  auth: authReducer
 }
 
 export default reducers
