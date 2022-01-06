@@ -14,7 +14,7 @@ const todos = [
 
 describe("Tests - App Component", () => {
   afterEach(() => cleanup())
-  
+
   test('should display the homepage on /', () => {
     const route = '/'
 

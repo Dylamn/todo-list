@@ -26,7 +26,8 @@ describe('Tests - Todos component', function () {
   });
 
   test('should edit a todo', async () => {
-    apiFirebaseMock.fetchTodos.mockResolvedValueOnce({data: [createTodo('test todo', false)]})
+    const todos = [createTodo('test todo')]
+    apiFirebaseMock.fetchTodos.mockResolvedValueOnce({data: todos})
 
     renderWithStoreAndRouter(<Todos />, '/?filter=all')
 
@@ -40,5 +41,20 @@ describe('Tests - Todos component', function () {
 
     await screen.findByText(/Updated todo/i)
     expect(apiFirebaseMock.saveTodos).toHaveBeenCalled()
+  });
+
+  test('should delete a todo', async () => {
+    expect.assertions(1)
+    
+    const todos = [createTodo("Try to remove me")]
+    const todoTitleRegex = /Try to remove me/
+    apiFirebaseMock.fetchTodos.mockResolvedValueOnce({data: todos})
+
+    renderWithStoreAndRouter(<Todos />, '/?filter=all')
+
+    await screen.findByText(todoTitleRegex)
+    fireEvent.click(screen.getByText(/^Delete$/))
+
+    expect(await screen.findByText(todoTitleRegex)).not.toBeInTheDocument()
   });
 });
